@@ -53,5 +53,5 @@ This is a full-stack web application designed for event organizers and attendees
 
 ### **Clone the Repository**
 ```bash
-git clone https://github.com/your-username/event-booking-app.git
+git clone https://github.com/ranvsingh7/Event_Management.git
 cd event-booking-app
