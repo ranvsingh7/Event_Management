@@ -2,6 +2,8 @@
 
 ## **Overview**
 This is a full-stack web application designed for event organizers and attendees. Organizers can list their events, and users can browse, book, and pay for events through a seamless interface. After booking, users receive an e-Pass for their events.
+---
+<img width="304" alt="Screenshot 2025-01-03 at 11 26 38 PM" src="https://github.com/user-attachments/assets/06be191c-7c08-4ec9-ab86-93dbe6a23031" />
 
 ---
 
