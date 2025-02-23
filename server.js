@@ -15,7 +15,7 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-    origin: "https://event-frontend-snowy.vercel.app", // Allow requests from this origin
+    origin: "https://event-frontend-sdsw.vercel.app", // Allow requests from this origin
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
 };
