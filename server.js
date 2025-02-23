@@ -3,11 +3,23 @@ const bodyParser = require("body-parser");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
 const eventRoutes = require("./routes/event");
+const cors = require("cors");
+
 
 
 require("dotenv").config();
 
 const app = express();
+
+// CORS configuration
+const corsOptions = {
+    origin: "http://localhost:3000", // Allow requests from this origin
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
+};
+
+app.use(cors(corsOptions));
+
 
 // Middleware
 app.use(bodyParser.json());
