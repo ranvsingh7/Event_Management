@@ -12,26 +12,15 @@ require("dotenv").config();
 const app = express();
 
 
-const allowedOrigins = [
-    "http://localhost:3000",
-    "https://event-frontend-snowy.vercel.app"
-];
 
 // CORS configuration
 const corsOptions = {
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            // Allow requests with no origin (like mobile apps or curl requests)
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
+    origin: "https://event-frontend-snowy.vercel.app", // Allow requests from this origin
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
 };
 
-app.use(cors(corsOptions));
+app.use(cors());
 
 
 // Middleware
