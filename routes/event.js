@@ -9,7 +9,7 @@ router.get("/my-events", authMiddleware, async (req, res) => {
     try {
         const events = await Event.find({ createdBy: req.user.id }).populate(
             "createdBy",
-            "username email"
+            "username email _id"
         );
         res.status(200).json(events);
     } catch (error) {
@@ -18,8 +18,8 @@ router.get("/my-events", authMiddleware, async (req, res) => {
 });
 
 // Create Event
-router.post("/", authMiddleware, async (req, res) => {
-    const { name, description, date, location, entryTypes } = req.body;
+router.post("/create-event", authMiddleware, async (req, res) => {
+    const { name, description, date, location, entryTypes,  } = req.body;
 
     try {
         const event = new Event({
@@ -34,13 +34,14 @@ router.post("/", authMiddleware, async (req, res) => {
         await event.save();
         res.status(201).json(event);
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: error.message });
     }
 });
 
-// Update Event
-router.put("/:id", authMiddleware, async (req, res) => {
-    const { name, description, date, location, entryTypes } = req.body;
+// Edit Event
+router.put("/edit-event/:id", authMiddleware, async (req, res) => {
+    const { name, description, date, location, entryTypes, } = req.body;
 
     try {
         const event = await Event.findByIdAndUpdate(
@@ -84,6 +85,8 @@ router.get("/:id", async (req, res) => {
 router.get("/", async (req, res) => {
     try {
         const events = await Event.find().populate("createdBy", "username email");
+        // const eventsCount = await Event.countDocuments();
+        // res.status(200).json({ events, eventsCount });
 
         res.status(200).json(events);
     } catch (error) {
