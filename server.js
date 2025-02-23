@@ -20,7 +20,7 @@ const corsOptions = {
     allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
 };
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 
 // Middleware
