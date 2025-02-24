@@ -12,15 +12,17 @@ require("dotenv").config();
 const app = express();
 
 
+const url = process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://event-frontend-snowy.vercel.app";
+
 
 // CORS configuration
 const corsOptions = {
-    origin: "https://event-frontend-snowy.vercel.app", // Allow requests from this origin
+    origin: url, // Frontend URL
     methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
 };
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 
 // Middleware
