@@ -105,9 +105,15 @@ router.put("/check-in/:id", async (req, res) => {
 });
 
 // Get Booking by ID
-router.get("/pass/:id", async (req, res) => {
+router.get("/pass/:id", authMiddleware, async (req, res) => {
     try {
         const booking = await Booking.findById(req.params.id);
+
+        if(booking){
+            if(booking.eventUserId.toString() !== req.user.id){
+                return res.status(401).json({ message: "Pass not Valid" });
+            }
+        }
 
         if (!booking) {
             return res.status(404).json({ message: "Booking not found" });
