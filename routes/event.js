@@ -32,7 +32,7 @@ router.post("/create-event", authMiddleware, async (req, res) => {
         });
 
         await event.save();
-        res.status(201).json(event);
+        res.status(201).json({event, message: "Event create successful"});
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message });

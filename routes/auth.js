@@ -33,7 +33,7 @@ router.post("/signup", async (req, res) => {
         //     expiresIn: "1d",
         // });
 
-        res.status(201).json( {res: "Account created successfull, please login!"} );
+        res.status(201).json( {message: "Account created successfull"} );
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -53,7 +53,7 @@ router.post("/signin", async (req, res) => {
             expiresIn: "1d",
         });
 
-        res.status(200).json({ token });
+        res.status(200).json({ token, message: "Login successfull" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
