@@ -45,6 +45,9 @@ router.post("/create-booking",  async (req, res) => {
         // }
         const booking = new Booking({
             name: req.body.name,
+            eventName: event.name,
+            eventDesc: event.description,
+            eventDate: event.date,
             email: req.body.email,
             mobile: req.body.mobile,
             amount: selectedPass.amount,
