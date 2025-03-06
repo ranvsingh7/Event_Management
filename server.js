@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
 const eventRoutes = require("./routes/event");
+const createOrderRoute = require('./routes/createOrder'); // Ensure the correct path
 const cors = require("cors");
 
 
@@ -35,6 +36,7 @@ connectDB();
 app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/bookings", require("./routes/booking"));
+app.use("/api/razorpay", createOrderRoute);
 
 
 const PORT = process.env.PORT || 6000;

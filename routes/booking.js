@@ -21,6 +21,59 @@ const router = express.Router();
 
 // Create Booking
 router.post("/create-booking",  async (req, res) => {
+    const event = await Event.findById(req.body.eventId);
+        console.log(event);
+    try {
+        const event = await Event.findById(req.body.eventId);
+        const selectedPassArray = event.entryTypes.filter(
+            (entry) => {
+                const objectId = new mongoose.Types.ObjectId(entry._id);
+                const stringId = objectId.toString();
+                return stringId === req.body.entryType;
+            }
+        );
+        if (selectedPassArray.length === 0) {
+            return res.status(404).json({ error: "Pass not found" });
+        }
+        const selectedPass = selectedPassArray[0];
+        
+        if (!event) {
+            return res.status(404).json({ error: "Event not found" });
+        }
+        // check mobile number if it is 10 digits 
+        // if (req.body.mobile.length !== 10) {
+        //     return res.status(400).json({ error: "Mobile number should be 10 digits" });
+        // }
+
+        const bookingLength = await (await Booking.find()).filter((booking) => booking.eventId.toString() === req.body.eventId).length;
+        const ticketId = `${event.name.split(" ").map(word=> word.charAt(0).toUpperCase()).join("") }${100+bookingLength}`;
+        const booking = new Booking({
+            name: req.body.name,
+            eventName: event.name,
+            eventDesc: event.description,
+            eventDate: event.date,
+            email: req.body.email,
+            mobile: req.body.mobile,
+            amount: selectedPass.amount,
+            passCount: selectedPass.count,
+            entryTitle: selectedPass.name,
+            remainingCount: selectedPass.count,
+            entryType: req.body.entryType,
+            eventId: req.body.eventId,
+            eventUserId: event.createdBy._id,
+            bookingId: ticketId,
+            paymentDetails: req.body.paymentDetails
+        });
+
+        await booking.save();
+        res.status(201).json(booking);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.post("/auth/create-booking", authMiddleware,  async (req, res) => {
 
     try {
         const event = await Event.findById(req.body.eventId);
@@ -43,6 +96,8 @@ router.post("/create-booking",  async (req, res) => {
         // if (req.body.mobile.length !== 10) {
         //     return res.status(400).json({ error: "Mobile number should be 10 digits" });
         // }
+        const bookingLength = await (await Booking.find()).filter((booking) => booking.eventId.toString() === req.body.eventId).length;
+        const ticketId = `${event.name.split(" ").map(word=> word.charAt(0).toUpperCase()).join("") }${100+bookingLength}`;
         const booking = new Booking({
             name: req.body.name,
             eventName: event.name,
@@ -56,6 +111,7 @@ router.post("/create-booking",  async (req, res) => {
             remainingCount: selectedPass.count,
             entryType: req.body.entryType,
             eventId: req.body.eventId,
+            bookingId: ticketId,
             eventUserId: event.createdBy._id,
         });
 
@@ -161,5 +217,22 @@ router.get("/:userId", authMiddleware, async (req, res) => {
     }
 });
 
+
+// Get Entry Type by ID
+
+router.get("/entry-type/:id", async (req, res) => {
+    const event = await Event.findById(req.body.eventId);
+    if(!event) return res.status(404).json({ message: "Event not found" });
+    const entryTypes = event.entryTypes;
+    try {
+        const entryType = await entryTypes.filter((entryType) => entryType._id.toString() === req.params.id)[0];
+        if (!entryType) {
+            return res.status(404).json({ message: "Entry type not found" });
+        }
+        res.status(200).json(entryType);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
 
 module.exports = router;
