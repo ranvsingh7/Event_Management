@@ -11,7 +11,7 @@ router.post("/signup", async (req, res) => {
     try {
         const existingEmail = await User.findOne({ email });
         const existingMobile = await User.findOne({ mobile });
-        const existingUsername = await User.findOne({ username });
+        // const existingUsername = await User.findOne({ username });
         const mobileLength = mobile.length !== 10;
         if (existingEmail) {
             return res.status(400).json({ message: "Email already exists" });
@@ -19,9 +19,9 @@ router.post("/signup", async (req, res) => {
         if (existingMobile) {
             return res.status(400).json({ message: "Mobile already exists" });
         }
-        if (existingUsername) {
-            return res.status(400).json({ message: "User name already exists" });
-        }
+        // if (existingUsername) {
+        //     return res.status(400).json({ message: "User name already exists" });
+        // }
         if(mobileLength){
             return res.status(400).json({ message: "Mobile number should be 10 digit" });
         }
@@ -35,6 +35,7 @@ router.post("/signup", async (req, res) => {
 
         res.status(201).json( {message: "Account created successfull"} );
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: error.message });
     }
 });

@@ -15,6 +15,8 @@ const bookingSchema = new mongoose.Schema({
     entryType: { type: String, required: true },
     eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event", required: true },
     eventUserId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    bookingId: { type: String, required: true },
+    paymentDetails: { type: Object, required: true },
     // createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
 }, { timestamps: true });
 
