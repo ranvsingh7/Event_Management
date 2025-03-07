@@ -113,6 +113,7 @@ router.post("/auth/create-booking", authMiddleware,  async (req, res) => {
             eventId: req.body.eventId,
             bookingId: ticketId,
             eventUserId: event.createdBy._id,
+            paymentDetails: req.body.paymentDetails
         });
 
         await booking.save();
