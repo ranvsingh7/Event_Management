@@ -13,15 +13,25 @@ require("dotenv").config();
 const app = express();
 
 
-const url = process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://event-frontend-sdsw.vercel.app";
+// const url = process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://event-frontend-sdsw.vercel.app";
 
 
 // CORS configuration
 const corsOptions = {
-    origin: url, // Frontend URL
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
-    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
-};
+    origin: function (origin, callback) {
+      const allowedOrigins = [
+        "http://localhost:3000",
+        "https://event-frontend-sdsw.vercel.app",
+      ];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  };
 
 app.use(cors(corsOptions));
 
