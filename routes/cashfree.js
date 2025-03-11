@@ -6,9 +6,13 @@ require('dotenv').config();
 const router = express.Router();
 
 // Setup Cashfree
-Cashfree.XClientId = process.env.CLIENT_ID;
-Cashfree.XClientSecret = process.env.CLIENT_SECRET;
+Cashfree.XClientId = process.env.NODE_ENV === "development" ? process.env.CLIENT_ID_DEV : process.env.CLIENT_ID_PRODUCTION;
+Cashfree.XClientSecret = process.env.NODE_ENV === "development" ? process.env.CLIENT_SECRET_DEV : process.env.CLIENT_SECRET_PRODUCTION;
 Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
+Cashfree.XEnvironment = process.env.NODE_ENV === "development" 
+    ? Cashfree.Environment.SANDBOX 
+    : Cashfree.Environment.PRODUCTION;
+
 
 // Generate Order ID
 function generateOrderId() {
@@ -21,17 +25,18 @@ function generateOrderId() {
 
 // Payment Route
 router.get('/payment', async (req, res) => {
+    const { amount, customer_id, customer_phone, customer_name, customer_email } = req.query;
     const order_id = generateOrderId()
     try {
         const request = {
-            order_amount: 1.00,
+            order_amount: Number(amount),
             order_currency: "INR",
             order_id: order_id,
             customer_details: {
-                customer_id: "webcodder01",
-                customer_phone: "9999999999",
-                customer_name: "Web Codder",
-                customer_email: "webcodder@example.com",
+                customer_id: customer_id,
+                customer_phone: customer_phone,
+                customer_name: customer_name,
+                customer_email: customer_email,
             },
         };
 
