@@ -2,11 +2,13 @@ const express = require("express");
 const router = express.Router();
 const { Cashfree } = require("cashfree-pg");
 const crypto = require("crypto");
+require("dotenv").config();
+
 
 
 // Cashfree Configuration
-Cashfree.XClientId = process.env.CLIENT_ID_PRODUCTION;
-Cashfree.XClientSecret = process.env.CLIENT_SECRET_PRODUCTION;
+Cashfree.XClientId = process.env.CLIENT_ID_PROD;
+Cashfree.XClientSecret = process.env.CLIENT_SECRET_PROD;
 Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
 
 // API version
