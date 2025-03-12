@@ -1,77 +1,57 @@
-const express = require('express');
-const crypto = require('crypto');
-const { Cashfree } = require('cashfree-pg');
-require('dotenv').config();
-
+const express = require("express");
 const router = express.Router();
+const { Cashfree } = require("cashfree-pg");
+const crypto = require("crypto");
 
-// Setup Cashfree
-Cashfree.XClientId = process.env.NODE_ENV === "development" ? process.env.CLIENT_ID_DEV : process.env.CLIENT_ID_PRODUCTION;
-Cashfree.XClientSecret = process.env.NODE_ENV === "development" ? process.env.CLIENT_SECRET_DEV : process.env.CLIENT_SECRET_PRODUCTION;
+
+// Cashfree Configuration
+Cashfree.XClientId = process.env.CLIENT_ID_PRODUCTION;
+Cashfree.XClientSecret = process.env.CLIENT_SECRET_PRODUCTION;
 Cashfree.XEnvironment = Cashfree.Environment.PRODUCTION;
-Cashfree.XEnvironment = process.env.NODE_ENV === "development" 
-    ? Cashfree.Environment.SANDBOX 
-    : Cashfree.Environment.PRODUCTION;
+
+// API version
+const API_VERSION = "2023-08-01";
+
+// Create Order Endpoint
+router.post("/create-order", async (req, res) => {
+    const { order_amount, customer_details, } = req.body;
+    const order_id = `order_${crypto.randomBytes(8).toString("hex")}`;
 
 
-// Generate Order ID
-function generateOrderId() {
-    const uniqueId = crypto.randomBytes(16).toString('hex');
-    const hash = crypto.createHash('sha256');
-    hash.update(uniqueId);
-    const orderId = hash.digest('hex');
-    return orderId.substr(0, 12);
-}
+    const request = {
+        order_amount,
+        "order_currency": "INR",
+        order_id,
+        customer_details
+    };
 
-// Payment Route
-router.get('/payment', async (req, res) => {
-    const { amount, customer_id, customer_phone, customer_name, customer_email } = req.query;
-    const order_id = generateOrderId()
     try {
-        const request = {
-            order_amount: Number(amount),
-            order_currency: "INR",
-            order_id: order_id,
-            customer_details: {
-                customer_id: customer_id,
-                customer_phone: customer_phone,
-                customer_name: customer_name,
-                customer_email: customer_email,
-            },
-        };
-
-        Cashfree.PGCreateOrder("2023-08-01", request)
-            .then(response => {
-                console.log(response.data);
-                res.json(response.data);
-            })
-            .catch(error => {
-                console.error(error.response.data.message);
-                res.status(500).json({ error: error.response.data.message });
-            });
+        const response = await Cashfree.PGCreateOrder(API_VERSION, request);
+        res.status(200).json({ message: "Order created successfully", data: response.data });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ message: "Error creating order", error: error.response?.data?.message || error.message });
     }
 });
 
-// Verify Payment Route
-router.post('/verify', async (req, res) => {
-    try {
-        const { orderId } = req.body;
+// Verify Payment Endpoint
+router.get("/verify-payment/:order_id", async (req, res) => {
+    const { order_id } = req.params;
 
-        Cashfree.PGOrderFetchPayments("2023-08-01", orderId)
-            .then(response => {
-                res.json(response.data);
-            })
-            .catch(error => {
-                console.error(error.response.data.message);
-                res.status(500).json({ error: error.response.data.message });
-            });
+    try {
+        const response = await Cashfree.PGOrderFetchPayments(API_VERSION, order_id);
+        const payments = response.data;
+        let orderStatus;
+        if (payments.filter(transaction => transaction.payment_status === "SUCCESS").length > 0) {
+            orderStatus = "Success";
+        } else if (payments.filter(transaction => transaction.payment_status === "PENDING").length > 0) {
+            orderStatus = "Pending";
+        } else {
+            orderStatus = "Failure";
+        }
+        res.status(200).json({ message: "Order verification completed", orderStatus, payments });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ message: "Error verifying payment", error: error.response?.data?.message || error.message });
     }
 });
 
-module.exports = router; 
+module.exports = router;
