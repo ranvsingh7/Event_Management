@@ -13,7 +13,7 @@ require("dotenv").config();
 const app = express();
 
 
-const url = process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://event-frontend-sdsw.vercel.app";
+const url = process.env.NODE_ENV === "development" ? "https://event-frontend-sdsw.vercel.app" : "https://event-frontend-sdsw.vercel.app";
 
 
 // CORS configuration
