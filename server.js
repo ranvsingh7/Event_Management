@@ -5,25 +5,40 @@ const authRoutes = require("./routes/auth");
 const eventRoutes = require("./routes/event");
 const cashfree = require("./routes/cashfree");
 const cors = require("cors");
-
-
-
 require("dotenv").config();
 
 const app = express();
 
 
-const url = "https://event-frontend-sdsw.vercel.app";
+const url = process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://event-frontend-sdsw.vercel.app";
 
 
 // CORS configuration
-const corsOptions = {
-    origin: url, // Frontend URL
-    methods: ["GET", "POST", "PUT", "DELETE"], // Allowed HTTP methods
-    allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
-};
+const allowedOrigins = [
+    "http://localhost:3000", // Local frontend
+    "https://event-frontend-sdsw.vercel.app", // Deployed frontend
+  ];
+  
+  const corsOptions = {
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  };
+  
+  app.use(cors(corsOptions));
+  app.options("*", cors(corsOptions));
 
-app.use(cors(corsOptions));
+  app.use((req, res, next) => {
+    console.log("Origin:", req.headers.origin);
+    next();
+  });
+  
 
 
 // Middleware
