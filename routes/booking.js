@@ -40,10 +40,10 @@ router.post("/create-booking",  async (req, res) => {
         if (!event) {
             return res.status(404).json({ error: "Event not found" });
         }
-        // check mobile number if it is 10 digits 
-        // if (req.body.mobile.length !== 10) {
-        //     return res.status(400).json({ error: "Mobile number should be 10 digits" });
-        // }
+
+        if (!event.isLive) {
+            return res.status(400).json({ error: "Event is not live" });
+        }
 
         const bookingLength = await (await Booking.find()).filter((booking) => booking.eventId.toString() === req.body.eventId).length;
         const ticketId = `${event.name.split(" ").map(word=> word.charAt(0).toUpperCase()).join("") }${100+bookingLength}`;

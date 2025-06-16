@@ -27,6 +27,7 @@ router.post("/create-event", authMiddleware, async (req, res) => {
             description,
             date,
             location,
+            isLive: false,
             entryTypes,
             createdBy: req.user.id,
         });
@@ -50,6 +51,7 @@ router.put("/edit-event/:id", authMiddleware, async (req, res) => {
                 name,
                 description,
                 date,
+                isLive,
                 location,
                 entryTypes,
             },
@@ -104,6 +106,27 @@ router.delete("/:id", authMiddleware, async (req, res) => {
         }
 
         res.status(200).json({ message: "Event deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Live Event
+router.put("/live-event/:id", authMiddleware, async (req, res) => {
+    const { isLive } = req.body;
+
+    try {
+        const event = await Event.findByIdAndUpdate(
+            req.params.id,
+            { isLive },
+            { new: true }
+        );
+
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        res.status(200).json(event);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
