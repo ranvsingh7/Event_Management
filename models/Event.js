@@ -4,6 +4,7 @@ const eventSchema = new mongoose.Schema({
     name: { type: String, required: true },
     description: { type: String },
     date: { type: Date, required: true },
+    isLive: { type: Boolean, required: true, default: false },
     entryTypes: {
         type: [
           {
