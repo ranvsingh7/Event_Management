@@ -4,6 +4,7 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
 const eventRoutes = require("./routes/event");
 const cashfree = require("./routes/cashfree");
+const emailService = require("./routes/email-service");
 const cors = require("cors");
 require("dotenv").config();
 
@@ -52,6 +53,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/bookings", require("./routes/booking"));
 app.use("/api/cashfree", cashfree);
+app.use("/api/email-service", emailService); // Email service route
 
 
 const PORT = process.env.PORT || 6000;
