@@ -19,9 +19,16 @@ router.get("/my-events", authMiddleware, async (req, res) => {
 
 // Create Event
 router.post("/create-event", authMiddleware, async (req, res) => {
-    const { name, description, date, location, entryTypes,  } = req.body;
+    const { name, description, date, location, entryTypes } = req.body;
 
     try {
+        const eventDate = new Date(date);
+
+        // Check if the provided date is in the past
+        if (eventDate < new Date().setHours(0, 0, 0, 0)) {
+            return res.status(400).json({ error: "Event date cannot be in the past." });
+        }
+
         const event = new Event({
             name,
             description,
@@ -33,7 +40,7 @@ router.post("/create-event", authMiddleware, async (req, res) => {
         });
 
         await event.save();
-        res.status(201).json({event, message: "Event create successful"});
+        res.status(201).json({ event, message: "Event created successfully" });
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: error.message });
@@ -42,36 +49,28 @@ router.post("/create-event", authMiddleware, async (req, res) => {
 
 // Edit Event
 router.put("/edit-event/:id", authMiddleware, async (req, res) => {
-    const { name, description, date, location, entryTypes, } = req.body;
+    const { name, description, date, location, entryTypes } = req.body;
 
     try {
+        const eventDate = new Date(date);
+
+        // Check if the provided date is in the past
+        if (eventDate < new Date().setHours(0, 0, 0, 0)) {
+            return res.status(400).json({ error: "Event date cannot be in the past." });
+        }
+
         const event = await Event.findByIdAndUpdate(
             req.params.id,
             {
                 name,
                 description,
                 date,
-                isLive,
+                isLive: false, // Reset isLive to false when editing
                 location,
                 entryTypes,
             },
             { new: true }
         );
-
-        if (!event) {
-            return res.status(404).json({ message: "Event not found" });
-        }
-
-        res.status(200).json(event);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// Get Event by ID
-router.get("/:id", async (req, res) => {
-    try {
-        const event = await Event.findById(req.params.id);
 
         if (!event) {
             return res.status(404).json({ message: "Event not found" });

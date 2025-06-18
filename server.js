@@ -7,6 +7,7 @@ const cashfree = require("./routes/cashfree");
 const emailService = require("./routes/email-service");
 const cors = require("cors");
 require("dotenv").config();
+require("./nightlyTask");
 
 const app = express();
 
