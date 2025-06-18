@@ -2,7 +2,7 @@ const cron = require("node-cron");
 const Event = require("./models/Event"); // Adjust the path to your Event model if necessary.
 
 // Nightly task to reset live status
-cron.schedule("14 00 * * *", async () => {
+cron.schedule("20 00 * * *", async () => {
     console.log("Running nightly task to update event live status...");
 
     try {
