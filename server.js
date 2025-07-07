@@ -12,7 +12,7 @@ require("./nightlyTask");
 const app = express();
 
 
-const url = process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://event-frontend-sdsw.vercel.app";
+const url = process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://paperlessticket.ranveersingh.me";
 
 
 // CORS configuration
