@@ -18,7 +18,7 @@ const url = process.env.NODE_ENV === "development" ? "http://localhost:3000" : "
 // CORS configuration
 const allowedOrigins = [
     "http://localhost:3000", // Local frontend
-    "https://event-frontend-sdsw.vercel.app", // Deployed frontend
+    "https://paperlessticket.ranveersingh.me", // Deployed frontend
   ];
   
   const corsOptions = {
