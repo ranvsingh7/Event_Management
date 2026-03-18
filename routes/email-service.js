@@ -10,7 +10,7 @@ const sendEmail = async (req, res) => {
   }
 
   const smtpHost = process.env.SMTP_HOST || "smtp.gmail.com";
-  const smtpPort = Number(process.env.SMTP_PORT || 465);
+  const smtpPort = Number(process.env.SMTP_PORT || 587);
   const smtpSecure =
     process.env.SMTP_SECURE !== undefined
       ? process.env.SMTP_SECURE === "true"
@@ -45,9 +45,16 @@ const sendEmail = async (req, res) => {
       host: smtpHost,
       port: smtpPort,
       secure: smtpSecure,
+      requireTLS: process.env.SMTP_REQUIRE_TLS !== "false",
+      connectionTimeout: Number(process.env.SMTP_CONNECTION_TIMEOUT || 15000),
+      greetingTimeout: Number(process.env.SMTP_GREETING_TIMEOUT || 10000),
+      socketTimeout: Number(process.env.SMTP_SOCKET_TIMEOUT || 20000),
       auth: {
         user: smtpUser,
         pass: smtpPass,
+      },
+      tls: {
+        minVersion: "TLSv1.2",
       },
     });
 
