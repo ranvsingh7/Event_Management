@@ -17,8 +17,14 @@ const sendEmail = async (req, res) => {
       : smtpPort === 465;
   const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;
   const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
-  const mailFrom =
-    process.env.MAIL_FROM || `"Paperless Ticket" <${smtpUser || "no-reply@paperless.local"}>`;
+  console.log(`[${requestId}] SMTP CONFIG →`, {
+  host: smtpHost,
+  port: smtpPort,
+  secure: smtpSecure,
+  user: smtpUser,
+  pass: smtpPass ? "EXISTS ✅" : "MISSING ❌",
+});
+  const mailFrom = process.env.MAIL_FROM || `"Paperless Ticket" <${smtpUser || "no-reply@paperless.local"}>`;
 
   const { eventName, eventDate, userName, passCount, bookingId, userEmail } = req.body || {};
 
