@@ -2,7 +2,10 @@ const QRCode = require('qrcode');
 const nodemailer = require('nodemailer');
 
 const sendEmail = async (req, res) => {
+  const requestId = req.requestId || `email-${Date.now()}`;
+
   if (req.method !== "POST") {
+    console.warn(`[${requestId}] email-service invalid method: ${req.method}`);
     return res.status(405).json({ message: "Method not allowed" });
   }
 
@@ -19,11 +22,19 @@ const sendEmail = async (req, res) => {
 
   const { eventName, eventDate, userName, passCount, bookingId, userEmail } = req.body || {};
 
+  console.log(
+    `[${requestId}] email-service payload received bookingId=${bookingId || "n/a"} userEmail=${
+      userEmail || "n/a"
+    }`
+  );
+
   if (!eventName || !eventDate || !userName || !passCount || !bookingId || !userEmail) {
+    console.warn(`[${requestId}] email-service missing required fields`);
     return res.status(400).json({ message: "Missing required details" });
   }
 
   if (!smtpUser || !smtpPass) {
+    console.error(`[${requestId}] email-service SMTP config missing`);
     return res.status(500).json({
       message: "Email configuration is missing. Set SMTP_USER and SMTP_PASS.",
     });
@@ -39,6 +50,9 @@ const sendEmail = async (req, res) => {
         pass: smtpPass,
       },
     });
+
+    await transporter.verify();
+    console.log(`[${requestId}] email-service transporter verified`);
 
     const qrCodeBuffer = await QRCode.toBuffer(String(bookingId), {
       type: "png",
@@ -95,7 +109,7 @@ const sendEmail = async (req, res) => {
       messageId: info.messageId,
     });
   } catch (error) {
-    console.error("Email service error:", error);
+    console.error(`[${requestId}] Email service error:`, error?.message || error);
     return res.status(500).json({
       message: "Failed to send email",
       error: error?.message || "Unknown email service error",

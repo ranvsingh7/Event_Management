@@ -11,6 +11,9 @@ require("./nightlyTask");
 
 const app = express();
 
+const DEBUG_ENABLED = process.env.DEBUG_ENABLED === "true";
+const DEBUG_KEY = process.env.DEBUG_KEY || "";
+
 
 const url = process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://paperlessticket.ranveersingh.me";
 
@@ -37,7 +40,17 @@ const allowedOrigins = [
   app.options("*", cors(corsOptions));
 
   app.use((req, res, next) => {
-    console.log("Origin:", req.headers.origin);
+    const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    req.requestId = requestId;
+    const start = Date.now();
+
+    console.log(`[${requestId}] ${req.method} ${req.originalUrl} origin=${req.headers.origin || "n/a"}`);
+
+    res.on("finish", () => {
+      const duration = Date.now() - start;
+      console.log(`[${requestId}] ${res.statusCode} ${req.method} ${req.originalUrl} ${duration}ms`);
+    });
+
     next();
   });
   
@@ -55,6 +68,26 @@ app.use("/api/events", eventRoutes);
 app.use("/api/bookings", require("./routes/booking"));
 app.use("/api/cashfree", cashfree);
 app.use("/api/email-service", emailService); // Email service route
+
+app.get("/api/debug/config-health", (req, res) => {
+  if (!DEBUG_ENABLED) {
+    return res.status(404).json({ message: "Not found" });
+  }
+
+  const key = req.headers["x-debug-key"] || req.query.key;
+  if (!DEBUG_KEY || key !== DEBUG_KEY) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
+  return res.status(200).json({
+    nodeEnv: process.env.NODE_ENV || "unknown",
+    timestamp: new Date().toISOString(),
+    smtpConfigured: Boolean(process.env.SMTP_USER && process.env.SMTP_PASS),
+    cashfreeConfigured: Boolean(process.env.CLIENT_ID_PROD && process.env.CLIENT_SECRET_PROD),
+    jwtConfigured: Boolean(process.env.JWT_SECRET),
+    apiBaseHint: process.env.CLIENT_BASE_URL || null,
+  });
+});
 
 
 const PORT = process.env.PORT || 6000;
