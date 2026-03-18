@@ -1,7 +1,5 @@
-import { Resend } from "resend";
-import QRCode from "qrcode";
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+const { Resend } = require("resend");
+const QRCode = require("qrcode");
 
 const sendEmail = async (req, res) => {
   const requestId = req.requestId || `email-${Date.now()}`;
@@ -26,6 +24,15 @@ const sendEmail = async (req, res) => {
   }
 
   try {
+    if (!process.env.RESEND_API_KEY) {
+      return res.status(500).json({
+        message: "Email configuration missing",
+        error: "RESEND_API_KEY is not set",
+      });
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
     // ✅ QR generate (base64)
     const qrCode = await QRCode.toDataURL(String(bookingId));
 
@@ -67,4 +74,4 @@ const sendEmail = async (req, res) => {
   }
 };
 
-export default sendEmail;
+module.exports = sendEmail;
