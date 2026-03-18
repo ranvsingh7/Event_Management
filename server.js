@@ -4,7 +4,11 @@ const connectDB = require("./config/db");
 const authRoutes = require("./routes/auth");
 const eventRoutes = require("./routes/event");
 const cashfree = require("./routes/cashfree");
-const emailService = require("./routes/email-service");
+const emailServiceModule = require("./routes/email-service");
+const emailService =
+  typeof emailServiceModule === "function"
+    ? emailServiceModule
+    : emailServiceModule.default;
 const cors = require("cors");
 require("dotenv").config();
 require("./nightlyTask");
@@ -61,6 +65,10 @@ app.use(bodyParser.json());
 
 // Database Connection
 connectDB();
+
+if (typeof emailService !== "function") {
+  throw new TypeError("email-service route must export a middleware function");
+}
 
 // Routes
 app.use("/api/auth", authRoutes);
