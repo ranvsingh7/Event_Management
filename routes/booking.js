@@ -185,6 +185,25 @@ router.get("/pass/:id", authMiddleware, async (req, res) => {
     }
 });
 
+// Get Booking by Booking ID
+router.get("/pass-by-booking-id/:bookingId", authMiddleware, async (req, res) => {
+    try {
+        const booking = await Booking.findOne({ bookingId: req.params.bookingId });
+
+        if (!booking) {
+            return res.status(404).json({ message: "Booking not found" });
+        }
+
+        if (booking.eventUserId.toString() !== req.user.id) {
+            return res.status(401).json({ message: "Pass not Valid" });
+        }
+
+        res.status(200).json(booking);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Get All Bookings
 router.get("/", async (req, res) => {
     try {
@@ -201,17 +220,36 @@ router.get("/", async (req, res) => {
 // Get My Bookings by User ID
 router.get("/:userId", authMiddleware, async (req, res) => {
     const { userId } = req.params;
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+    const skip = (page - 1) * limit;
 
     try {
-        const bookings = await Booking.find({ eventUserId: userId })
-            .populate("eventId", "name location date") 
-            .populate("eventUserId", "username email"); 
+        const query = { eventUserId: userId };
 
-        if (!bookings.length) {
-            return res.status(404).json({ message: "No bookings found for this user" });
-        }
+        const [bookings, total] = await Promise.all([
+            Booking.find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .populate("eventId", "name location date")
+                .populate("eventUserId", "username email"),
+            Booking.countDocuments(query),
+        ]);
 
-        res.status(200).json(bookings);
+        const totalPages = Math.ceil(total / limit);
+        const hasMore = skip + bookings.length < total;
+
+        res.status(200).json({
+            bookings,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasMore,
+            },
+        });
     } catch (error) {
         console.error("Error fetching bookings for user:", error);
         res.status(500).json({ error: error.message });
