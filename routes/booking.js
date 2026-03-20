@@ -51,6 +51,7 @@ router.post("/create-booking",  async (req, res) => {
             name: req.body.name,
             eventName: event.name,
             eventDesc: event.description,
+            location: event.location,
             eventDate: event.date,
             email: req.body.email,
             mobile: req.body.mobile,
@@ -102,6 +103,7 @@ router.post("/auth/create-booking", authMiddleware,  async (req, res) => {
             name: req.body.name,
             eventName: event.name,
             eventDesc: event.description,
+            location: event.location,
             eventDate: event.date,
             email: req.body.email,
             mobile: req.body.mobile,
@@ -167,7 +169,7 @@ router.put("/check-in/:id", async (req, res) => {
 // Get Booking by ID
 router.get("/pass/:id", authMiddleware, async (req, res) => {
     try {
-        const booking = await Booking.findById(req.params.id);
+        const booking = await Booking.findById(req.params.id).populate("eventId", "location");
 
         if(booking){
             if(booking.eventUserId.toString() !== req.user.id){
@@ -179,7 +181,10 @@ router.get("/pass/:id", authMiddleware, async (req, res) => {
             return res.status(404).json({ message: "Booking not found" });
         }
 
-        res.status(200).json(booking);
+        const bookingPayload = booking.toObject();
+        bookingPayload.location = booking.location || booking.eventId?.location || "";
+
+        res.status(200).json(bookingPayload);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -188,7 +193,7 @@ router.get("/pass/:id", authMiddleware, async (req, res) => {
 // Get Booking by Booking ID
 router.get("/pass-by-booking-id/:bookingId", authMiddleware, async (req, res) => {
     try {
-        const booking = await Booking.findOne({ bookingId: req.params.bookingId });
+        const booking = await Booking.findOne({ bookingId: req.params.bookingId }).populate("eventId", "location");
 
         if (!booking) {
             return res.status(404).json({ message: "Booking not found" });
@@ -198,7 +203,10 @@ router.get("/pass-by-booking-id/:bookingId", authMiddleware, async (req, res) =>
             return res.status(401).json({ message: "Pass not Valid" });
         }
 
-        res.status(200).json(booking);
+        const bookingPayload = booking.toObject();
+        bookingPayload.location = booking.location || booking.eventId?.location || "";
+
+        res.status(200).json(bookingPayload);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
