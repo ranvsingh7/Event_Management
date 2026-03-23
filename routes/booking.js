@@ -6,6 +6,26 @@ const { default: mongoose } = require("mongoose");
 
 const router = express.Router();
 
+const normalizeMobileNumber = (mobile = "") => {
+    const digits = String(mobile).replace(/\D/g, "");
+
+    if (digits.length <= 10) {
+        return digits;
+    }
+
+    if (digits.length === 11 && digits.startsWith("0")) {
+        return digits.slice(1);
+    }
+
+    if (digits.length === 12 && digits.startsWith("91")) {
+        return digits.slice(2);
+    }
+
+    return digits.slice(0, 10);
+};
+
+const isValidMobileNumber = (mobile) => /^\d{10}$/.test(mobile);
+
 // // Get All My Booking
 // router.get("/my-bookings", authMiddleware, async (req, res) => {
 //     try {
@@ -24,6 +44,11 @@ router.post("/create-booking",  async (req, res) => {
     const event = await Event.findById(req.body.eventId);
         console.log(event);
     try {
+        const normalizedMobile = normalizeMobileNumber(req.body.mobile);
+        if (!isValidMobileNumber(normalizedMobile)) {
+            return res.status(400).json({ error: "Mobile number must be exactly 10 digits" });
+        }
+
         const event = await Event.findById(req.body.eventId);
         const selectedPassArray = event.entryTypes.filter(
             (entry) => {
@@ -54,7 +79,7 @@ router.post("/create-booking",  async (req, res) => {
             location: event.location,
             eventDate: event.date,
             email: req.body.email,
-            mobile: req.body.mobile,
+            mobile: normalizedMobile,
             amount: selectedPass.amount,
             passCount: selectedPass.count,
             entryTitle: selectedPass.name,
@@ -77,6 +102,11 @@ router.post("/create-booking",  async (req, res) => {
 router.post("/auth/create-booking", authMiddleware,  async (req, res) => {
 
     try {
+        const normalizedMobile = normalizeMobileNumber(req.body.mobile);
+        if (!isValidMobileNumber(normalizedMobile)) {
+            return res.status(400).json({ error: "Mobile number must be exactly 10 digits" });
+        }
+
         const event = await Event.findById(req.body.eventId);
         const selectedPassArray = event.entryTypes.filter(
             (entry) => {
@@ -106,7 +136,7 @@ router.post("/auth/create-booking", authMiddleware,  async (req, res) => {
             location: event.location,
             eventDate: event.date,
             email: req.body.email,
-            mobile: req.body.mobile,
+            mobile: normalizedMobile,
             amount: selectedPass.amount,
             passCount: selectedPass.count,
             entryTitle: selectedPass.name,
